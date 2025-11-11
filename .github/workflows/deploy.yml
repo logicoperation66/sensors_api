@@ -56,7 +56,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           port: 10378               # 🔥 ważne: Twój port SSH
           key: ${{ secrets.VPS_KEY }}
-          source: "./EspApi/"
+          source: "./EspApi/**"
           target: "/home/${{ secrets.VPS_USER }}/espapi"
 
       - name: Restart Docker container
@@ -67,7 +67,6 @@ jobs:
           port: 10378               # 🔥 również tutaj
           key: ${{ secrets.VPS_KEY }}
           script: |
-            cd "./EspApi/"
             cd /home/${{ secrets.VPS_USER }}/espapi
             docker build -t espapi .
             docker stop espapi || true
