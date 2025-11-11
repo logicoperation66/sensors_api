@@ -51,6 +51,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: espapi
+          path: ./espapi
 
       - name: Copy project files to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -59,8 +60,9 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           port: 10378
           key: ${{ secrets.VPS_KEY }}
-          source: "./EspApi/**/*"
+          source: "./espapi/*"
           target: "/home/${{ secrets.VPS_USER }}/espapi"
+          strip_components: 1
 
       - name: Restart Docker container on VPS
         uses: appleboy/ssh-action@v1.2.0
