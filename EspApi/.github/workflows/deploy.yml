@@ -48,6 +48,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
+          port: 10378               # 🔥 ważne: Twój port SSH
           key: ${{ secrets.VPS_KEY }}
           source: "./"
           target: "/home/${{ secrets.VPS_USER }}/espapi"
@@ -57,6 +58,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
+          port: 10378               # 🔥 również tutaj
           key: ${{ secrets.VPS_KEY }}
           script: |
             cd /home/${{ secrets.VPS_USER }}/espapi
