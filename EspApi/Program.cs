@@ -14,7 +14,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
+/*cicdtest*/
 
 app.MapPost("/api/sensor", (SensorData data) =>
 {
