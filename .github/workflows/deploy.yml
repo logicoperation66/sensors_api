@@ -13,6 +13,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Debug - list project files
+        run: ls -R ./EspApi
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -20,7 +23,7 @@ jobs:
 
       - name: Restore dependencies
         run: |
-         cd EspApi
+          cd EspApi
           dotnet restore
 
       - name: Build
@@ -49,22 +52,22 @@ jobs:
         with:
           name: espapi
 
-      - name: Copy to VPS & Deploy
+      - name: Copy project files to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          port: 10378               # 🔥 ważne: Twój port SSH
+          port: 10378
           key: ${{ secrets.VPS_KEY }}
-          source: "./EspApi/**"
+          source: "./EspApi/**/*"
           target: "/home/${{ secrets.VPS_USER }}/espapi"
 
-      - name: Restart Docker container
+      - name: Restart Docker container on VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          port: 10378               # 🔥 również tutaj
+          port: 10378
           key: ${{ secrets.VPS_KEY }}
           script: |
             cd /home/${{ secrets.VPS_USER }}/espapi
@@ -72,3 +75,4 @@ jobs:
             docker stop espapi || true
             docker rm espapi || true
             docker run -d -p 8080:8080 --name espapi espapi
+
