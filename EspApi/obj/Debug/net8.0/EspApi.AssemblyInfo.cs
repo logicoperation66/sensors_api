@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EspApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4a739c9e13158c48b4f68f97953c593a6d57555d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ce6f81f2cafa9ad562a3eaaf130e76125438eca2")]
 [assembly: System.Reflection.AssemblyProductAttribute("EspApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EspApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
