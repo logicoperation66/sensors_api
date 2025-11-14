@@ -2,7 +2,7 @@ using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var apiKey = builder.Configuration["ApiKey"] ?? "twoj-bezpieczny-klucz-zmien-mnie";
+var apiKey = builder.Configuration["ApiKey"] ?? "dupakupa";
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
