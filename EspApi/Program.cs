@@ -1,28 +1,12 @@
-using AspNetCoreRateLimit;
-
 var builder = WebApplication.CreateBuilder(args);
 
 var apiKey = builder.Configuration["ApiKey"] ?? "dupakupa";
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMemoryCache();
-builder.Services.Configure<IpRateLimitOptions>(options =>
-{
-    options.GeneralRules = new List<RateLimitRule>
-    {
-        new RateLimitRule
-        {
-            Endpoint = "*",
-            Limit = 100,
-            Period = "1h"
-        }
-    };
-});
-builder.Services.AddInMemoryRateLimiting();
-builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-// Dodaj singleton do przechowywania odczytów
 builder.Services.AddSingleton<SensorDataStore>();
+
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -34,11 +18,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Middleware weryfikujący API key
+app.UseCors(policy => policy
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/health") || 
-        context.Request.Path.StartsWithSegments("/api/sensor") && context.Request.Method == "GET")
+        (context.Request.Path.StartsWithSegments("/api/sensor") && context.Request.Method == "GET"))
     {
         await next();
         return;
@@ -71,20 +59,16 @@ app.MapPost("/api/sensor", (SensorData data, SensorDataStore store) =>
     };
     
     store.AddReading(reading);
-    
     Console.WriteLine($"Otrzymano dane: {reading.Temperature}°C od {reading.DeviceId}");
-    
     return Results.Ok(new { status = "received", timestamp = reading.Timestamp });
 });
 
-// Endpoint do pobrania ostatnich odczytów (bez zabezpieczenia - read-only)
 app.MapGet("/api/sensor", (SensorDataStore store, int? limit) =>
 {
     var readings = store.GetLatestReadings(limit ?? 20);
     return Results.Ok(readings);
 });
 
-// Endpoint do statystyk
 app.MapGet("/api/sensor/stats", (SensorDataStore store) =>
 {
     var readings = store.GetLatestReadings(20);
@@ -96,9 +80,7 @@ app.MapGet("/api/sensor/stats", (SensorDataStore store) =>
         count = readings.Count,
         avgTemperature = readings.Average(r => r.Temperature),
         minTemperature = readings.Min(r => r.Temperature),
-        maxTemperature = readings.Max(r => r.Temperature),
-        latestReading = readings.First(),
-        oldestReading = readings.Last()
+        maxTemperature = readings.Max(r => r.Temperature)
     };
     
     return Results.Ok(stats);
@@ -109,7 +91,6 @@ app.MapGet("/health", () => Results.Ok(new { status = "OK" }));
 app.Run();
 
 record SensorData(float Temperature, string? DeviceId = null);
-
 record SensorReading
 {
     public float Temperature { get; init; }
@@ -128,8 +109,6 @@ class SensorDataStore
         lock (_lock)
         {
             _readings.Enqueue(reading);
-            
-            // Usuń najstarszy odczyt jeśli przekroczono limit
             while (_readings.Count > MaxReadings)
             {
                 _readings.Dequeue();
